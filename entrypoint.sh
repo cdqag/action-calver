@@ -6,7 +6,7 @@ if [ -z "${GITHUB_WORKSPACE}" ]; then
   exit 1
 fi
 
-if [ -z ${DATE_FORMAT} ]; then
+if [ -z "${DATE_FORMAT}" ]; then
     echo "The DATE_FORMAT environment variable is not defined."
     exit 1
 fi
