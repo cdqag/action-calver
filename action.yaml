@@ -1,0 +1,30 @@
+---
+name: 'CalVer'
+description: 'Create next CalVer version'
+
+branding:
+  icon: 'tag'
+  color: 'blue'
+
+inputs:
+  date_format:
+    description: 'Format date in posix shell (stftime)'
+    required: false
+    default: '%Y.%M'
+  prerelease:
+    description: 'Is the release a pre-release'
+    required: false
+    default: false
+
+outputs:
+  last_version:
+    description: 'Last version'
+  next_version:
+    description: 'Next version'
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  env:
+    DATE_FORMAT: ${{ inputs.date_format }}
+    PRERELEASE: ${{ inputs.prerelease }}
