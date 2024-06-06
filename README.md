@@ -8,13 +8,12 @@ Checkout action have to fetch tags by (`fetch-tags: true`) to get the latest tag
 
 ## Example usage
 
-
 This release job will generate a CalVer version and use this next version to:
+
 - Docker build
 - Docker push
 - Push a tag
 - Create a GitHub release
-
 
 If the workflow is triggered by a `workflow_dispatch` event, the version will be a pre-release.
 
