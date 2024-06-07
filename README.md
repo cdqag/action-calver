@@ -39,9 +39,9 @@ jobs:
 
       - name: CalVer
         id: calver
-        run: energosoft/calver-action@v1
+        run: energostack/calver-action@v1
         with:
-          PRERELEASE=${{ github.event_name == 'workflow_dispatch' }}
+          prerelease: ${{ github.event_name == 'workflow_dispatch' }}
 
       - name: Docker build
         run: docker build -t my-image:${{ steps.calver.outputs.next_version }} .
