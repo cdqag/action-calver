@@ -27,6 +27,9 @@ on:
 
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
     release:
       - uses: actions/checkout@v4
