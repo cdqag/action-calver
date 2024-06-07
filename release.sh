@@ -24,7 +24,7 @@ if git rev-parse "v$major_version" >/dev/null 2>&1
 then
   git tag -d "v$major_version"
   git push origin ":v$major_version"
-
-  git tag -a "v$major_version" -m "Release $major_version"
-  git push origin "v$major_version"
 fi
+
+git tag -a "v$major_version" -m "Release $major_version"
+git push origin "v$major_version"
