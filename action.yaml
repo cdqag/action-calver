@@ -10,7 +10,7 @@ inputs:
   date_format:
     description: 'Format date in posix shell (stftime)'
     required: false
-    default: '%Y.%M'
+    default: '%Y.%m'
   prerelease:
     description: 'Is the release a pre-release'
     required: false
