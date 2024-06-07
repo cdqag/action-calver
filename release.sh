@@ -12,9 +12,9 @@ fi
 git checkout main
 git pull
 
-# you have to installed semver tool (https://github.com/fsaintjacques/semver-tool)
+# Ensure the semver tool is installed before running this script. For installation, visit: https://github.com/fsaintjacques/semver-tool
 
-major_version=$(semver get major $new_version)
+major_version=$(semver get major "$new_version")
 
 git tag -a "v$new_version" -m "Release $new_version"
 git push origin "v$new_version"
