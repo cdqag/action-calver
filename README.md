@@ -8,7 +8,7 @@ Checkout action have to fetch tags by (`fetch-tags: true`) to get the latest tag
 
 ## Example usage
 
-This release job will generate a CalVer version and use this next version to:
+This release workflow generate a CalVer version and use this next version to:
 
 - Docker build
 - Docker push
@@ -22,10 +22,7 @@ name: Release
 
 on:
   pull_request:
-    types:
-      - closed
     branch:
-      - master
       - main
 
   workflow_dispatch:
@@ -39,7 +36,7 @@ jobs:
 
       - name: CalVer
         id: calver
-        run: energostack/calver-action@v1
+        uses: energostack/calver-action@v1
         with:
           prerelease: ${{ github.event_name == 'workflow_dispatch' }}
 
