@@ -1,6 +1,6 @@
 ---
-name: 'CalVer'
-description: 'Create next CalVer version'
+name: 'Next CalVer'
+description: 'Just create next CalVer version'
 
 branding:
   icon: 'tag'
