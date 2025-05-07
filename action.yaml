@@ -36,15 +36,6 @@ runs:
         echo "Last version: ${LAST_VERSION}"
         echo "value=${LAST_VERSION}" >> $GITHUB_OUTPUT
 
-    - name: Get last hash
-      id: last_hash
-      shell: sh
-      run: |
-        LAST_HASH="$(git show-ref -s "${LAST_VERSION}")"
-        
-        echo "Last hash: ${LAST_HASH}"
-        echo "value=${LAST_HASH}" >> $GITHUB_OUTPUT
-
     - name: Get next version
       id: next_version
       shell: sh
