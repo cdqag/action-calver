@@ -9,22 +9,62 @@ branding:
 inputs:
   date_format:
     description: 'Format date in posix shell (stftime)'
-    required: false
     default: '%Y.%m'
+
   prerelease:
     description: 'Is the release a pre-release'
-    required: false
-    default: false
+    default: 'false'
 
 outputs:
   last_version:
     description: 'Last version'
+    value: ${{ steps.last_version.outputs.value }}
+
   next_version:
     description: 'Next version'
+    value: ${{ steps.next_version.outputs.value }}
 
 runs:
-  using: 'docker'
-  image: 'Dockerfile'
-  env:
-    DATE_FORMAT: ${{ inputs.date_format }}
-    PRERELEASE: ${{ inputs.prerelease }}
+  using: composite
+  steps:
+    - name: Get last version
+      id: last_version
+      shell: sh
+      run: |
+        LAST_VERSION=$(git tag --sort=-v:refname | grep -E "^v" | head -n 1)
+        
+        echo "Last version: ${LAST_VERSION}"
+        echo "value=${LAST_VERSION}" >> $GITHUB_OUTPUT
+
+    - name: Get last hash
+      id: last_hash
+      shell: sh
+      run: |
+        LAST_HASH="$(git show-ref -s "${LAST_VERSION}")"
+        
+        echo "Last hash: ${LAST_HASH}"
+        echo "value=${LAST_HASH}" >> $GITHUB_OUTPUT
+
+    - name: Get next version
+      id: next_version
+      shell: sh
+      env:
+        DATE_FORMAT: ${{ inputs.date_format }}
+        PRERELEASE: ${{ inputs.prerelease }}
+      run: |
+        NEXT_DATE_PART="v$(date "+${DATE_FORMAT}")"
+        echo "Next date part: ${NEXT_DATE_PART}"
+
+        if case $LAST_VERSION in $NEXT_DATE_PART*) ;; *) false;; esac ; then
+          echo "Incrementing patch version.";
+          NEXT_VERSION="${LAST_VERSION%.*}.$(( ${LAST_VERSION##*.} + 1 ))";
+        else
+          NEXT_VERSION="$NEXT_DATE_PART.0";
+        fi;
+
+        if [ "${PRERELEASE}" = "true" ]; then \
+          NEXT_VERSION="${NEXT_VERSION}-pre-release"; \
+        fi;
+
+        echo "Next version: ${NEXT_VERSION}"
+        echo "value=${NEXT_VERSION}" >> $GITHUB_OUTPUT
