@@ -40,6 +40,7 @@ runs:
       id: next_version
       shell: sh
       env:
+        LAST_VERSION: ${{ steps.last_version.outputs.value }}
         DATE_FORMAT: ${{ inputs.date_format }}
         PRERELEASE: ${{ inputs.prerelease }}
       run: |
