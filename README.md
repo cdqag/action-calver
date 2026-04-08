@@ -32,7 +32,7 @@ permissions:
 
 jobs:
     release:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 1
           fetch-tags: true
