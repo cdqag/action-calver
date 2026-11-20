@@ -1,70 +1,86 @@
 ---
-name: 'Next CalVer'
-description: 'Just create next CalVer version'
+name: 'CalVer Action'
+description: 'Action that versions using CalVer'
 
 branding:
   icon: 'tag'
   color: 'blue'
 
 inputs:
-  date_format:
-    description: 'Format date in posix shell (stftime)'
-    default: '%Y.%m'
+  github-token:
+    description: 'GitHub Token'
+    required: true
 
   prerelease:
     description: 'Is the release a pre-release'
     default: 'false'
 
 outputs:
-  last_version:
-    description: 'Last version'
-    value: ${{ steps.last_version.outputs.last_version }}
+  latest-release-tag:
+    description: 'Latest release tag found in the repository'
+    value: ${{ steps.latest.outputs.tag }}
 
-  next_version:
-    description: 'Next version'
-    value: ${{ steps.next_version.outputs.next_version }}
+  current-version:
+    description: 'Current version'
+    value: ${{ steps.latest.outputs.version }}
 
-  next_tag:
-    description: 'Next tag'
-    value: ${{ steps.next_version.outputs.next_tag }}
+  new-version:
+    description: 'New version'
+    value: ${{ steps.new.outputs.version }}
+
+  new-tag:
+    description: 'New tag'
+    value: ${{ steps.new.outputs.tag }}
 
 runs:
   using: composite
   steps:
-    - name: Get last version
-      id: last_version
-      shell: sh
-      run: |
-        LAST_VERSION=$(git tag --sort=-v:refname | grep -E "^v" | head -n 1)
-        
-        echo "Last version: ${LAST_VERSION}"
-        echo "last_version=${LAST_VERSION}" >> $GITHUB_OUTPUT
-
-    - name: Get next version
-      id: next_version
-      shell: sh
+    - name: Get latest release tag
+      id: latest
+      shell: bash
       env:
-        LAST_VERSION: ${{ steps.last_version.outputs.last_version }}
-        DATE_FORMAT: ${{ inputs.date_format }}
+        GH_TOKEN: ${{ inputs.github-token }}
+      run: |
+        set -e
+        set -o pipefail
+
+        tag=$(gh release list -O desc -L 1 --json "tagName" | jq -r '.[0].tagName // "v0.0.0"')
+        echo "Latest release tag: ${tag}"
+        echo "tag=${tag}" >> $GITHUB_OUTPUT
+
+        version="${tag:1}"
+        echo "Latest version: ${version}"
+        echo "version=${version}" >> $GITHUB_OUTPUT
+
+    - name: Calculate new version
+      id: new
+      shell: bash
+      env:
+        CURRENT_VERSION: ${{ steps.latest.outputs.version }}
         PRERELEASE: ${{ inputs.prerelease }}
       run: |
-        NEXT_DATE_PART="$(date "+${DATE_FORMAT}")"
-        echo "Next date part: ${NEXT_DATE_PART}"
+        set -e
 
-        if case $LAST_VERSION in $NEXT_DATE_PART*) ;; *) false;; esac ; then
-          echo "Incrementing patch version.";
-          NEXT_VERSION="${LAST_VERSION%.*}.$(( ${LAST_VERSION##*.} + 1 ))";
+        NEW_DATE_PART=$(date '+%Y.%m')
+        echo "New date part: ${NEW_DATE_PART}"
+
+        echo "Decision making..."
+        if case $CURRENT_VERSION in $NEW_DATE_PART*) ;; *) false;; esac ; then
+          echo "Current version and new version part matches - Incrementing patch version.";
+          version="${CURRENT_VERSION%.*}.$(( ${CURRENT_VERSION##*.} + 1 ))";
         else
-          NEXT_VERSION="$NEXT_DATE_PART.0";
+          echo "Current version and new version does not match - Starting new version from patch 0"
+          version="$NEW_DATE_PART.0";
         fi;
 
         if [ "${PRERELEASE}" = "true" ]; then \
-          NEXT_VERSION="${NEXT_VERSION}-pre-release"; \
+          echo "Detected prelease flag enabled"
+          version="${version}-pre-release"; \
         fi;
 
-        echo "Next version: ${NEXT_VERSION}"
-        echo "next_version=${NEXT_VERSION}" >> $GITHUB_OUTPUT
+        echo "New version: ${version}"
+        echo "version=${version}" >> $GITHUB_OUTPUT
 
-        NEXT_TAG="v${NEXT_VERSION}"
-        echo "Next tag: ${NEXT_TAG}"
-        echo "next_tag=${NEXT_TAG}" >> $GITHUB_OUTPUT
+        tag="v${version}"
+        echo "New tag: ${tag}"
+        echo "tag=${tag}" >> $GITHUB_OUTPUT
