@@ -39,7 +39,7 @@ jobs:
 
       - name: CalVer
         id: calver
-        uses: energostack/calver-action@v1
+        uses: cdqag/action-calver@v2
         with:
           prerelease: ${{ github.event_name == 'workflow_dispatch' }}
 
@@ -49,15 +49,11 @@ jobs:
       - name: Docker push
         run: docker push my-image:${{ steps.calver.outputs.next_version }}
 
-      - uses: thejeff77/action-push-tag@v1
+      - name: Release
+        id: release
+        uses: ncipollo/release-action@v1
         with:
-          tag: ${{ steps.calver.outputs.next_version }}
-          message: '"${{ steps.calver.outputs.next_version }}: PR #${{ github.event.pull_request.number }} - ${{ github.event.pull_request.title }}"'
-
-      - name: Create Release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ steps.calver.outputs.next_version }}
-          generate_release_notes: true
-          prerelease: ${{ github.event_name == 'workflow_dispatch' }}
+          token: ${{ github.token }}
+          tag: ${{ steps.calver.outputs.next_tag }}
+          body: "Released version ${{ steps.calver.outputs.next_version }}"
 ```

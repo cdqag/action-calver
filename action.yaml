@@ -18,11 +18,15 @@ inputs:
 outputs:
   last_version:
     description: 'Last version'
-    value: ${{ steps.last_version.outputs.value }}
+    value: ${{ steps.last_version.outputs.last_version }}
 
   next_version:
     description: 'Next version'
-    value: ${{ steps.next_version.outputs.value }}
+    value: ${{ steps.next_version.outputs.next_version }}
+
+  next_tag:
+    description: 'Next tag'
+    value: ${{ steps.next_version.outputs.next_tag }}
 
 runs:
   using: composite
@@ -34,17 +38,17 @@ runs:
         LAST_VERSION=$(git tag --sort=-v:refname | grep -E "^v" | head -n 1)
         
         echo "Last version: ${LAST_VERSION}"
-        echo "value=${LAST_VERSION}" >> $GITHUB_OUTPUT
+        echo "last_version=${LAST_VERSION}" >> $GITHUB_OUTPUT
 
     - name: Get next version
       id: next_version
       shell: sh
       env:
-        LAST_VERSION: ${{ steps.last_version.outputs.value }}
+        LAST_VERSION: ${{ steps.last_version.outputs.last_version }}
         DATE_FORMAT: ${{ inputs.date_format }}
         PRERELEASE: ${{ inputs.prerelease }}
       run: |
-        NEXT_DATE_PART="v$(date "+${DATE_FORMAT}")"
+        NEXT_DATE_PART="$(date "+${DATE_FORMAT}")"
         echo "Next date part: ${NEXT_DATE_PART}"
 
         if case $LAST_VERSION in $NEXT_DATE_PART*) ;; *) false;; esac ; then
@@ -59,4 +63,8 @@ runs:
         fi;
 
         echo "Next version: ${NEXT_VERSION}"
-        echo "value=${NEXT_VERSION}" >> $GITHUB_OUTPUT
+        echo "next_version=${NEXT_VERSION}" >> $GITHUB_OUTPUT
+
+        NEXT_TAG="v${NEXT_VERSION}"
+        echo "Next tag: ${NEXT_TAG}"
+        echo "next_tag=${NEXT_TAG}" >> $GITHUB_OUTPUT
