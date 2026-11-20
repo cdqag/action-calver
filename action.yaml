@@ -44,7 +44,7 @@ runs:
         set -e
         set -o pipefail
 
-        tag=$(gh release list -O desc -L 1 --json "tagName" | jq -r '.[0].tagName // "v0.0.0"')
+        tag=$(gh release list -R "$GITHUB_REPOSITORY" -O desc -L 1 --json "tagName" | jq -r '.[0].tagName // "v0.0.0"')
         echo "Latest release tag: ${tag}"
         echo "tag=${tag}" >> $GITHUB_OUTPUT
 
